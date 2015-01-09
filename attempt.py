@@ -124,7 +124,7 @@ def query_walgreens(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode=
       page (int): 1-offset page number for pagenated output from Walgreens.com
 
     Returns:
-      list of dict: A list of at most 5 dicts containing product location information for an individual item
+      list of tuple: A `list` of at most 5 `tuple`s containing product location information for an individual item
         None if no products of the requested type near the specified location exist, or if
         the page number is beyond the complete list of all neaby products. 
     """
