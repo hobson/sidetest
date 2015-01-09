@@ -1,13 +1,5 @@
 """Example ipython session:
 
-%run attempt.py
-for rec in generate_walgreens():
-    print rec
-%run attempt.py
-for rec in generate_walgreens():
-    print rec
-history
-
 >>> %run attempt.py
 >>> for rec in generate_walgreens():
 ...     print rec
