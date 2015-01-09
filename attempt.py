@@ -1,9 +1,46 @@
+"""Example ipython session:
+
+%run attempt.py
+for rec in generate_walgreens():
+    print rec
+%run attempt.py
+for rec in generate_walgreens():
+    print rec
+history
+
+>>> %run attempt.py
+>>> for rec in generate_walgreens():
+...     print rec
+(18716, 1, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4926', u'2013-12-18 23:52:03', u'19135_1')
+(18717, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_5522', u'2013-12-18 23:52:03', u'19135_1')
+(18718, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_12902', u'2013-12-18 23:52:03', u'19135_1')
+(18719, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_3569', u'2013-12-18 23:52:03', u'19135_1')
+(18720, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_13141', u'2013-12-18 23:52:03', u'19135_1')
+(3126, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_3139', u'2013-12-18 23:11:02', u'70119_1')
+(3127, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_10316', u'2013-12-18 23:11:02', u'70119_1')
+(3128, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_2262', u'2013-12-18 23:11:02', u'70119_1')
+(3129, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_13777', u'2013-12-18 23:11:02', u'70119_1')
+(3130, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4304', u'2013-12-18 23:11:02', u'70119_1')
+(3593, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_1450', u'2013-12-18 23:12:20', u'60534_1')
+(3594, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_5076', u'2013-12-18 23:12:20', u'60534_1')
+(3595, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_13966', u'2013-12-18 23:12:20', u'60534_1')
+(3596, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_2711', u'2013-12-18 23:12:20', u'60534_1')
+(3597, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_2785', u'2013-12-18 23:12:20', u'60534_1')
+(8599, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4350', u'2013-12-18 23:26:50', u'53215_1')
+(8600, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_7661', u'2013-12-18 23:26:50', u'53215_1')
+(8601, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_3509', u'2013-12-18 23:26:50', u'53215_1')
+(8602, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_11237', u'2013-12-18 23:26:50', u'53215_1')
+(8603, 1, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_649', u'2013-12-18 23:26:50', u'53215_1')
+...
+"""
+
 import json
 from collections import Counter
 import pandas as pd
+import itertools
 
 
-def mirror_walgreens():
+def generate_walgreens():
     """Generate all retail products (and their store zip codes) for Walgreens
 
     Each query to the website takes a product_id and zipcode and page number. 
@@ -29,25 +66,29 @@ def mirror_walgreens():
     products = ['e00d60d327046ad96439559e177a4ade361c8688']
     # strip the '_1' to mimic a real database
     # presumably you'd already have a list of all the zipcodes you want to query
-    zipcodes = [s[:-2] for s in Counter(query_wallgreens.db['zipcode']).keys()]
+    zipcodes = [s[:-2] for s in Counter(query_walgreens.db['zipcode']).keys()]
     # likewise for walgreens store location ids
-    stores = [s.split('_')[0] for s in Counter(query_wallgreens.db['store_id']).keys()]
+    stores = [s.split('_')[0] for s in Counter(query_walgreens.db['store_id']).keys()]
+    # unused yet, but this is the prepropcessing you'd do to optimize
     tbd = list(itertools.product(products, stores))
-    records = []
+    # records = []
     for product, zc in itertools.product(products, zipcodes):
         for zc in zipcodes:
-            zip_records = []
+            page, zip_records = 0, []
             while True:
-                zip_records += list(query_wallgreens(product, zc, page))
+                page += 1
+                zip_records += list(query_walgreens(product, zc, page))
                 if len(zip_records) >= stores_in_zipcode(zc):
                     break
-            records += zip_records
-    print records
+            # records += zip_records
+            for rec in zip_records:
+                yield rec
+    # return records
 
 # you probably want to memoize this since it's called deep in your loop
 # @pug.decorators.memoize
 def stores_in_zipcode(zipcode):
-    return 5
+    return 0
 
 def index_products(path='gistfile1.json'):
     """Index (create hash table) of a table of records from a json file"""
@@ -61,7 +102,6 @@ def index_products(path='gistfile1.json'):
         store_products[i] = [rec[k] for k in labels]
     assert(len(js)==len(store_products))
     return store_products
-
 
 
 def load_dataframe(path='gistfile1.json'):
@@ -83,7 +123,7 @@ def analyze(df=None):
         print dict((k,v) for i,(k,v) in enumerate(c.iteritems()) if i < 20)
 
 
-def query_walgreens(product, zipcode, page=1):
+def query_walgreens(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode='76065', page=1):
     """Return at most 5 product records for stores in or near the indicated zipcode
 
     Arguments:
@@ -97,7 +137,8 @@ def query_walgreens(product, zipcode, page=1):
         the page number is beyond the complete list of all neaby products. 
     """
     db = query_walgreens.db
-    return db[(db['product_id'] == product) & (db['zipcode'] == zipcode)].head(5)
+    df = db[(db['product_id'] == product) & (db['zipcode'] == zipcode+'_{0}'.format(page))].head(5)
+    return list(df.to_records())
     # return {"product_id": "e00d60d327046ad96439559e177a4ade361c8688", "store_id": "walgreens_11926", "zipcode": "76801_1", "ts": "2013-12-18 23:01:49", "availability": 0, "quantity": 0}
 # maintain a single copy of the database (a pandas dataframe) in RAM
 query_walgreens.db = load_dataframe()
