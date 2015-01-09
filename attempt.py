@@ -68,14 +68,8 @@ def load_dataframe(path='gistfile1.json'):
     """Create a pandas dataframe from a list of objects in a json file"""
     js = json.load(open(path, 'r'))
     df = pd.DataFrame.from_records(js)
-    print df.describe()
     assert(len(df)==len(js))
     return df
-    keys = ('product_id', 'store_id')
-    store_products = {}
-    for rec in js:
-        i = '|'.join(rec[k] for k in keys)
-        store_products[i] = rec
 
 
 def analyze(df=None):
