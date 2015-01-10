@@ -1,3 +1,4 @@
+#!/usr/bin/env python 
 """Example ipython session:
 
 >>> %run attempt.py
