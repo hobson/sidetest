@@ -1,9 +1,8 @@
 #!/usr/bin/env python 
 """Example ipython session:
 
->>> %run attempt.py
->>> for rec in generate_walgreens():
-...     print rec
+>>> import attempt
+>>> for rec in attempt.generate_walgreens(): print rec
 (18716, 1, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4926', u'2013-12-18 23:52:03', u'19135_1')
 (18717, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_5522', u'2013-12-18 23:52:03', u'19135_1')
 (18718, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_12902', u'2013-12-18 23:52:03', u'19135_1')
