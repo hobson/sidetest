@@ -2,6 +2,14 @@
 
 This is example code for a job application
 
+Seems like a traveling salesman problem where the first 50 store-zipcode edges of the graph looks like this:
+
+![Force-Directed Graph Diagram](spring50edges.png?raw=true "50 Store-Zipcode Edges, Force-Directed Layout")
+
+or this
+
+![Shell Graph Diagram](shell50edges.png?raw=true "50 Store-Zipcode Edges, Shell (Circle) Layout")
+
 # Installation
 
 If you use pip, virtualenv, and virtualenvwrapper (you really should):

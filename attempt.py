@@ -55,6 +55,8 @@ def draw_graph(graph, labels=None, layout='shell',
                text_font='sans-serif'):
     """from https://www.udacity.com/wiki/creating-network-graphs-with-python"""
 
+    plt.figure(figsize=(11,8))
+
     # create networkx graph
     G=nx.Graph()
 
@@ -90,25 +92,21 @@ def draw_graph(graph, labels=None, layout='shell',
                                      label_pos=edge_text_pos)
 
     # show graph
-    plt.show()
+    plt.show(block=False)
 
 
-# def main():
-db = query_walgreens.db  # 38025 total records
-# records_per_zipcode = Counter(db['zipcode'])  #  5725 zipcodes 
-# records_per_store = Counter(db['store_id'])   #  8131 stores
-zipcode_store_pairs = Counter((row[0].split('_')[0], row[1].split('_')[1]) for row in db[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
+if __name__ == '__main__':
+    # def main():
+    db = query_walgreens.db  # 38025 total records
+    # records_per_zipcode = Counter(db['zipcode'])  #  5725 zipcodes 
+    # records_per_store = Counter(db['store_id'])   #  8131 stores
+    zipcode_store_pairs = Counter((row[0].split('_')[0], 'WG'+row[1].split('_')[1]) for row in db[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
 
+    # list all the zipcodes for each store, and all stores for each zipcode
+    store_zipcodes, zipcode_stores = {}, {}
+    for zipcode, store in zipcode_store_pairs:
+        store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
+        zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
 
-# a list of all the zipcodes for each store
-store_zipcodes, zipcode_stores = {}, {}
-for zipcode, store in zipcode_store_pairs:
-    store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
-    zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
+    draw_graph(sorted(zipcode_store_pairs.keys())[:50], labels=False, layout='spring')
 
-
-draw_graph(sorted(store_zipcode_pairs.keys())[:20], labels=False, layout='spring')
-
-# # now just need to find the optimal zipcodes to query so that all the stores will be
-# if __name__ == '__main__':
-#     main()
