@@ -75,7 +75,7 @@ def build_graph(df, limit=100):
     return G
 
 
-def draw_graph(df, limit=100, labels=None, layout='shell',
+def draw_graph(G, labels=None, layout='shell',
                node_size=400, node_color='blue', node_alpha=0.3,
                node_text_size=6,
                edge_color='blue', edge_alpha=0.3, edge_thickness=1,
@@ -83,9 +83,8 @@ def draw_graph(df, limit=100, labels=None, layout='shell',
                text_font='sans-serif'):
     """from https://www.udacity.com/wiki/creating-network-graphs-with-python"""
 
-    plt.figure(figsize=(11,8))
+    fig = plt.figure(figsize=(11,8))
 
-    G = build_graph(df=df, limit=limit)
 
     # these are different layouts for the network you may try
     # shell seems to work best
@@ -115,7 +114,7 @@ def draw_graph(df, limit=100, labels=None, layout='shell',
     #                                  label_pos=edge_text_pos)
 
     # show graph
-    plt.title('Graph {0} Stores (Nodes) at the top of the Zip Code List'.format(limit))
+    plt.title('{0} Stores (Nodes) x {1} Edges'.format(len(G.nodes()), len(G.edges())))
     plt.show(block=False)
 
     return G
@@ -134,7 +133,7 @@ def main(limit=100):
     #     store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
     #     zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
 
-    G = draw_graph(df, limit=limit, labels=False, layout='spring')
+    G = draw_graph(build_graph(df=df, limit=limit), labels=False, layout='spring')
     
     # draw_graph(sorted(zipcode_store.keys())[:50], labels=False, layout='shell')
     # plt.title('Shell: 50 Zipcode->Store Edges')

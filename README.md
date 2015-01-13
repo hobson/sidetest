@@ -1,9 +1,20 @@
 # sidetest
 
-A real-world traveling salesman, spanning tree problem, sort-of. When you query an API, you get a list of the closest 5 stores for each zip code query (edge?) and you want to "visit" all the stores with as few queries as possible. If you use Kruskal with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 verices, but Kruskal only gives you credit for 1. You could give each zip/edge/arc a length of 1/N^2, where N is the number of stores in that zip query (usually 5). But since this is pretty uniform it help much. What if you added 0-length edges between all stores returned for a given zip!? Now we're talking!
+I'm having fun, here with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
 
+# Problem
 
-Here's a graph diagram of 50 edges, where edges connect stores to zipcodes.
+Say you have an API that you can query with a zip code, and you get a list of the closest 5 stores, and you want to "visit" all the stores with as few queries as possible. 
+
+# Possible Algorithms
+
+If you use Kruskal's Algorithm with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 vertices, but Kruskal only gives you credit for 1 as it explores the graph. You could give each zip/edge/arc a weight of N or N^2 (length of 1/N or 1/N^2, where N is the number of stores in that zip query (usually 5).  This improves things a big and is what I've done. But since this is pretty uniform length/weight it help all that much. What if you added 0-length edges between all stores returned for a given zip!? Now we're talking! But wait, you don't get ALL the possible nodes for a given zipcode query. You only get 5.  So maybe 1/N is the right cost metric (length). 
+
+Here's a graph diagram of all the stores with their edges defined by zipcodes that they share:
+
+    >>> G = build_graph(df, limit=100000)
+    >>> len(G.nodes()), len(G.edges())
+    (7921, 34254)
 
 ![Force-Directed Graph Diagram](spring50edges.png?raw=true "50 Store-Zipcode Edges, Force-Directed Layout")
 
@@ -15,6 +26,9 @@ Here are the first 7 store -> zipcode edges:
 
 ![Force-Directed Graph, 7 Stores](first7stores.png?raw=true "First 7 Stores, Force-Directed Layout")
 
+# My Attempt
+
+I'm using 1/min(N,5) s the length for each edge between stores sharing a zipcode query response. MST algorithms usually assume a fully connected graph -- you can see from the plots that this one isn't. So I'm doing MST (Kruskal) on each of the graph cliques. The second option is what I've chosen. Should have a solution up shortly.
 
 # Installation
 
