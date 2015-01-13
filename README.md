@@ -1,6 +1,6 @@
 # sidetest
 
-A real-world traveling salesman, spanning tree problem, sort-of. You Get  list of the closest 5 stores for each zip code query (edge?) and you want to "visit" all the stores with as few queries as possible. If you use Kruskal with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 verices, but Kruskal only gives you credit for 1. You'd Have to weight each zip/edge by 1/N-sqrd where N is the number of stores in that zip query (usually 5). 
+A real-world traveling salesman, spanning tree problem, sort-of. When you query an API, you get a list of the closest 5 stores for each zip code query (edge?) and you want to "visit" all the stores with as few queries as possible. If you use Kruskal with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 verices, but Kruskal only gives you credit for 1. You could give each zip/edge/arc a length of 1/N^2, where N is the number of stores in that zip query (usually 5). But since this is pretty uniform it help much. What if you added 0-length edges between all stores returned for a given zip!? Now we're talking!
 
 
 Here's a graph diagram of 50 edges, where edges connect stores to zipcodes.
