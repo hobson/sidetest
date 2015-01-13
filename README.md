@@ -1,6 +1,7 @@
 # sidetest
 
-A real-world traveling salesman problem. 
+A real-world traveling salesman, spanning tree problem, sort-of. You Get  list of the closest 5 stores for each zip code query (edge?) and you want to "visit" all the stores with as few queries as possible. If you use Kruskal with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 verices, but Kruskal only gives you credit for 1. You'd Have to weight each zip/edge by 1/N-sqrd where N is the number of stores in that zip query (usually 5). 
+
 
 Here's a graph diagram of 50 edges, where edges connect stores to zipcodes.
 
