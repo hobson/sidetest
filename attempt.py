@@ -94,19 +94,27 @@ def draw_graph(graph, labels=None, layout='shell',
     # show graph
     plt.show(block=False)
 
-
-if __name__ == '__main__':
-    # def main():
+def main():
     db = query_walgreens.db  # 38025 total records
     # records_per_zipcode = Counter(db['zipcode'])  #  5725 zipcodes 
     # records_per_store = Counter(db['store_id'])   #  8131 stores
-    zipcode_store_pairs = Counter((row[0].split('_')[0], 'WG'+row[1].split('_')[1]) for row in db[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
+    zipcode_store = Counter((row[0].split('_')[0], 'WG'+row[1].split('_')[1]) for row in db[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
+    store_zipcode = Counter(('WG'+row[1].split('_')[1], row[0].split('_')[0]) for row in db[['zipcode', 'store_id']].values)  
 
     # list all the zipcodes for each store, and all stores for each zipcode
     store_zipcodes, zipcode_stores = {}, {}
-    for zipcode, store in zipcode_store_pairs:
+    for zipcode, store in zipcode_store:
         store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
         zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
 
-    draw_graph(sorted(zipcode_store_pairs.keys())[:50], labels=False, layout='spring')
+    draw_graph(sorted(zipcode_store.keys())[:50], labels=False, layout='spring')
+    plt.title('Force-Directed: 50 Zipcode->Store Edges')
+    draw_graph(sorted(zipcode_store.keys())[:50], labels=False, layout='shell')
+    plt.title('Shell: 50 Zipcode->Store Edges')
+    draw_graph(sorted(store_zipcode.keys())[:20], labels=False, layout='spring')
+    plt.title('Force-Directed: 20 Store->Zipcode Edges')
+
+
+if __name__ == '__main__':
+    main()
 

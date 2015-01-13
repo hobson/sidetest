@@ -10,6 +10,11 @@ or this
 
 ![Shell Graph Diagram](shell50edges.png?raw=true "50 Store-Zipcode Edges, Shell (Circle) Layout")
 
+Here are the first 7 store -> zipcode edges:
+
+![Force-Directed Graph, 7 Stores](first7stores.png?raw=true "First 7 Stores, Force-Directed Layout")
+
+
 # Installation
 
 If you use pip, virtualenv, and virtualenvwrapper (you really should):
@@ -54,6 +59,10 @@ Virtualenvs help you maintain repeatable development environments. Virtualenvwra
 # I don't want to use pip
 
 Follow the official instructions for installing pandas [here](http://pandas.pydata.org/pandas-docs/stable/install.html)
+
+Find the isntructions for installing `networkx` on your system and install it as well.
+
+The other dependencies listed in `requirements.txt` should have been installed with `pandas` and `networkx`.
 
 You can then clone the repo and run the attempts.py script:
 
