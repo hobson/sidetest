@@ -1,92 +1,8 @@
 #!/usr/bin/env python 
-"""Example ipython session:
-
->>> import attempt
->>> for i, rec in enumerate(attempt.generate_walgreens()): print(rec)
-(18716, 1, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4926', u'2013-12-18 23:52:03', u'19135_1')
-(18717, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_5522', u'2013-12-18 23:52:03', u'19135_1')
-(18718, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_12902', u'2013-12-18 23:52:03', u'19135_1')
-(18719, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_3569', u'2013-12-18 23:52:03', u'19135_1')
-(18720, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_13141', u'2013-12-18 23:52:03', u'19135_1')
-(3126, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_3139', u'2013-12-18 23:11:02', u'70119_1')
-(3127, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_10316', u'2013-12-18 23:11:02', u'70119_1')
-(3128, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_2262', u'2013-12-18 23:11:02', u'70119_1')
-(3129, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_13777', u'2013-12-18 23:11:02', u'70119_1')
-(3130, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4304', u'2013-12-18 23:11:02', u'70119_1')
-(3593, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_1450', u'2013-12-18 23:12:20', u'60534_1')
-(3594, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_5076', u'2013-12-18 23:12:20', u'60534_1')
-(3595, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_13966', u'2013-12-18 23:12:20', u'60534_1')
-(3596, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_2711', u'2013-12-18 23:12:20', u'60534_1')
-(3597, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_2785', u'2013-12-18 23:12:20', u'60534_1')
-(8599, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4350', u'2013-12-18 23:26:50', u'53215_1')
-(8600, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_7661', u'2013-12-18 23:26:50', u'53215_1')
-(8601, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_3509', u'2013-12-18 23:26:50', u'53215_1')
-(8602, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_11237', u'2013-12-18 23:26:50', u'53215_1')
-(8603, 1, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_649', u'2013-12-18 23:26:50', u'53215_1')
-...
-"""
-
 import json
 from collections import Counter
 import pandas as pd
 import itertools
-
-
-def list_walgreens():
-    """Generate all retail products (and their store zip codes) for Walgreens
-
-    Each query to the website takes a product_id and zipcode and page number. 
-    Each page of a query response should return 5 product-store pairs with a count of the quantity at that location 
-    (though the actual Walgreens site returns 6 different products when I excercise it manually, without a product_id)
-
-    A correct and complete strategy would be to query a zipcode not in those already found for each individual product until all zipcodes have been queried at least once for each product. This seem like an O(N*M*P) solution, where N = # zipcodes, M = # product types, P = # pages.
-    But worst case optimal solution would be O(N*M) if no duplicate product-store pairs were returned for the same zipcode query.
-    To reduce duplicate queries need to maintain list of all possible N*M  product-store combinations
-
-    you'd preprocess your list of store_ids and zipcodes to count the number of stores in each zipcode, that number divided by 5 is the number of pages you'd have to request
-    More optimally, for each product you'd like to
-        1. iterate through zipcodes querying the db for that product at that location, page 1
-        2. query that zipcode for another page only if more than 5 stores exist in that zip
-        3. cross off a store-product pair from each of the <=5 records retrieved, using a master "TBD" list of store-prod pairs
-        4. move on to the zipcode of the next store-product pair in your TBD list
-        5. build up an adjacency graph of store locations for future optimization (path planning through the graph)
-    typical database record:
-    {"product_id": "e00d60d327046ad96439559e177a4ade361c8688", "store_id": "walgreens_5210", "zipcode": "76065_1", "ts": "2013-12-18 23:02:13", "availability": 0, "quantity": 0}
-    """
-    # presumably you'd already have a list of all the products you want to query, if not this would have to be obtained with another function optimized for that purpose
-    # Only have 1 product in this test database
-    products = ['e00d60d327046ad96439559e177a4ade361c8688']
-
-    # likewise for walgreens store location ids
-    stores = [s.split('_')[0] for s in Counter(query_walgreens.db['store_id']).keys()]
-    # unused, but this is the prepropcessing you'd do to optimize
-    tbd = list(itertools.product(products, stores))
-    records = []
-    for i, (product, zc) in enumerate(itertools.product(products, zipcodes)):
-        print str(i) + ' ' + '-'*20 + ' ' + str(zc)
-        page, zip_records = 0, []
-        while True:
-            page += 1
-            zip_records += list(query_walgreens(product, zc, page))
-            if len(zip_records) >= stores_in_zipcode(zc):
-                break
-        records += zip_records
-    print len(records)
-    return records
-
-# CRUFT: UNUSED
-# def index_products(path='gistfile1.json'):
-#     """Index (create hash table) of a table of records from a json file"""
-#     js = json.load(open(path, 'r'))
-#     labels = js[0].keys()
-#     keys = ('product_id', 'store_id')
-#     store_products = {}
-#     for rec in js:
-#         i = '|'.join(rec[k] for k in keys)
-#         # need to make sure all the columns are processed in the same order to reuse the canonical labels list
-#         store_products[i] = [rec[k] for k in labels]
-#     assert(len(js)==len(store_products))
-#     return store_products
 
 
 def load_dataframe(path='gistfile1.json'):
@@ -128,29 +44,71 @@ def query_walgreens(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode=
 # maintain a single copy of the database (a pandas dataframe) in RAM
 query_walgreens.db = load_dataframe()
 
+import networkx as nx
+import matplotlib.pyplot as plt
 
-def main(N=float('inf')):
-    records = []
-    for i, rec in enumerate(list_walgreens()):
-        # don't print the index integer generated by pandas
-        print("Query {0:7d} Response: {1}".format(i, list(rec)[1:]))
-        records += [rec]
-        if i>=N:
-            break
-    return records
+def draw_graph(graph, labels=None, layout='shell',
+               node_size=1600, node_color='blue', node_alpha=0.3,
+               node_text_size=12,
+               edge_color='blue', edge_alpha=0.3, edge_tickness=1,
+               edge_text_pos=0.3,
+               text_font='sans-serif'):
+    """from https://www.udacity.com/wiki/creating-network-graphs-with-python"""
 
-# strip the '_1' to mimic a real database
-# presumably you'd already have a list of all the zipcodes you want to query
-# since there's only one product the count of records is the count of stores (assuming no repeat stores)
+    # create networkx graph
+    G=nx.Graph()
+
+    # add edges
+    for edge in graph:
+        G.add_edge(edge[0], edge[1])
+
+    # these are different layouts for the network you may try
+    # shell seems to work best
+    if layout == 'spring':
+        graph_pos=nx.spring_layout(G)
+    elif layout == 'spectral':
+        graph_pos=nx.spectral_layout(G)
+    elif layout == 'random':
+        graph_pos=nx.random_layout(G)
+    else:
+        graph_pos=nx.shell_layout(G)
+
+    # draw graph
+    nx.draw_networkx_nodes(G,graph_pos,node_size=node_size, 
+                           alpha=node_alpha, node_color=node_color)
+    nx.draw_networkx_edges(G,graph_pos,width=edge_tickness,
+                           alpha=edge_alpha,edge_color=edge_color)
+    nx.draw_networkx_labels(G, graph_pos,font_size=node_text_size,
+                            font_family=text_font)
+
+    if labels is None:
+        labels = range(len(graph))
+
+    if labels:
+        edge_labels = dict(zip(graph, labels))
+        nx.draw_networkx_edge_labels(G, graph_pos, edge_labels=edge_labels, 
+                                     label_pos=edge_text_pos)
+
+    # show graph
+    plt.show()
+
+
+# def main():
 db = query_walgreens.db  # 38025 total records
-records_per_zipcode = Counter(db['zipcode'])  #  5725 zipcodes 
-records_per_store = Counter(db['store_id'])   #  8131 stores
-store_zipcode_pairs = Counter(tuple(row) for row in db[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
+# records_per_zipcode = Counter(db['zipcode'])  #  5725 zipcodes 
+# records_per_store = Counter(db['store_id'])   #  8131 stores
+zipcode_store_pairs = Counter((row[0].split('_')[0], row[1].split('_')[1]) for row in db[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
+
+
 # a list of all the zipcodes for each store
 store_zipcodes, zipcode_stores = {}, {}
-for zipcode, store in store_zipcode_pairs:
+for zipcode, store in zipcode_store_pairs:
     store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
     zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
-# now just need to find the optimal zipcodes to query so that all the stores will be
-if __name__ == '__main__':
-    main()
+
+
+draw_graph(sorted(store_zipcode_pairs.keys())[:20], labels=False, layout='spring')
+
+# # now just need to find the optimal zipcodes to query so that all the stores will be
+# if __name__ == '__main__':
+#     main()
