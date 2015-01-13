@@ -1,8 +1,8 @@
 # sidetest
 
-This is example code for a job application
+A real-world traveling salesman problem. 
 
-Seems like a traveling salesman problem where the first 50 store-zipcode edges of the graph looks like this:
+Here's a graph diagram of 50 edges, where edges connect stores to zipcodes.
 
 ![Force-Directed Graph Diagram](spring50edges.png?raw=true "50 Store-Zipcode Edges, Force-Directed Layout")
 
