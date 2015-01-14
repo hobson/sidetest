@@ -1,12 +1,18 @@
 #!/usr/bin/env python 
 import json
+import os
 from collections import Counter
 import pandas as pd
 import itertools
 from collections import OrderedDict
 
 import networkx as nx
+from networkx.readwrite import json_graph
 import matplotlib.pyplot as plt
+import json
+
+# requires future package
+import http.server
 
 
 def load_dataframe(path='gistfile1.json'):
@@ -28,25 +34,33 @@ def analyze(df=None):
         print dict((k,v) for i,(k,v) in enumerate(c.iteritems()) if i < 20)
 
 
-def query_walgreens(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode='76065', page=1):
+def split_into_connected_graphs(G):
+    CGs = []
+    for cc in nx.connected_components(G):
+        CG = nx.Graph()
+        for node in cc:
+            CG
+
+
+def api(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode='76065', page=1):
     """Return at most 5 product records for stores in or near the indicated zipcode
 
     Arguments:
       product_id (str): hexadecimal identifier for a product type or model (NOT a physical item serial number)
       zip_code (str): 5 or 9-digit zip-code near which you want to find products
-      page (int): 1-offset page number for pagenated output from Walgreens.com
+      page (int): 1-offset page number for pagenated output from a chain store website
 
     Returns:
       list of tuple: A `list` of at most 5 `tuple`s containing product location information for an individual item
         None if no products of the requested type near the specified location exist, or if
         the page number is beyond the complete list of all neaby products. 
     """
-    db = query_walgreens.db
+    db = api.db
     df = db[(db['product_id'] == product) & (db['zipcode'] == zipcode+'_{0}'.format(page))].head(5)
     return list(df.to_records())
-    # return {"product_id": "e00d60d327046ad96439559e177a4ade361c8688", "store_id": "walgreens_11926", "zipcode": "76801_1", "ts": "2013-12-18 23:01:49", "availability": 0, "quantity": 0}
+    # return {"product_id": "e00d60d327046ad96439559e177a4ade361c8688", "store_id": "store_11926", "zipcode": "76801_1", "ts": "2013-12-18 23:01:49", "availability": 0, "quantity": 0}
 # maintain a single copy of the database (a pandas dataframe) in RAM
-query_walgreens.db = load_dataframe()
+api.db = load_dataframe()
 
 
 def build_graph(df, limit=100):
@@ -56,23 +70,48 @@ def build_graph(df, limit=100):
     store_zipcodes, zipcode_stores = {}, {}
     for zipcode, store in df[['zipcode', 'store_id']].values:
         zipcode = zipcode.split('_')[0]
-        store = 'WG' + store.split('_')[1]
+        store = 's' + store.split('_')[1]
         store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
         zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
 
     zipcode_stores = OrderedDict(sorted(zipcode_stores.items()))
-    # build random nodes
+
     G = nx.Graph(name='Stores')
 
     # Lengths are proportional to the number of stores that are returned for the same zipcode query, maximum of 5 for the pagination limit
     for zc, stores in zipcode_stores.iteritems():
-        length = 1.0 / min(len(stores), 5.0)
+        L = 1.0 / min(len(stores), 5.0)
         for edge in itertools.combinations(stores, 2):
-            G.add_edge(edge[0], edge[1], weight=1.0/length, length=length)
+            if edge[0] == edge[1]:
+                continue
+            length, zipcode = L, zc
+            # the edge may already exist (stores may share another zip too), so must chose the shortest length of the two
+            if G.has_edge(*edge):
+                existing_edge = G.edge[edge[0]][edge[1]]
+                # reuse the old zipcode even if the new one is the same length (to diversify the zipcode queries amd maximize the 5-store zipcode responses)
+                if existing_edge['length'] < length:
+                    length, zipcode = existing_edge['length'], existing_edge['zipcode']
+            G.add_edge(edge[0], edge[1], weight=1.0/length, length=length, zipcode=zipcode)
+        # only recheck the limit length after a zipcode batch has been processed
         if len(G.nodes()) >= limit:
             break
-
     return G
+
+
+def write_d3_json(G):
+    for node in G:
+        G.node[node]['name'] = node
+    # node-link (d3.js) format data stucture
+    d = json_graph.node_link_data(G) 
+    # serialize the node-link list
+    json.dump(d, open('force/force.json','w'), indent=2)
+
+
+def serve_d3_json(port=8000):
+    print('Browse to file://{0} with your browser'.format(os.path.join(os.path.realpath('./force/'), 'force.html')))
+    print('Hit Ctrl-C to stop the server')
+    httpd = http.server.HTTPServer(('', port), http.server.SimpleHTTPRequestHandler)
+    httpd.serve_forever()
 
 
 def draw_graph(G, labels=None, layout='shell',
@@ -82,12 +121,9 @@ def draw_graph(G, labels=None, layout='shell',
                edge_text_pos=0.3,
                text_font='sans-serif'):
     """from https://www.udacity.com/wiki/creating-network-graphs-with-python"""
+    plt.figure(figsize=(12, 8))
 
-    fig = plt.figure(figsize=(11,8))
-
-
-    # these are different layouts for the network you may try
-    # shell seems to work best
+    # spring, spectral, random, and shell layout algorithms:
     if layout.lower().strip()[:3] == 'spr':
         graph_pos=nx.spring_layout(G)
     elif layout.lower().strip()[:3] in ('spe', 'spc'):
@@ -121,11 +157,10 @@ def draw_graph(G, labels=None, layout='shell',
 
 
 def main(limit=100):
-    df = query_walgreens.db  # 38025 total records
     # # records_per_zipcode = Counter(df['zipcode'])  #  5725 zipcodes 
     # # records_per_store = Counter(df['store_id'])   #  8131 stores
-    # zipcode_store = Counter((row[0].split('_')[0], 'WG'+row[1].split('_')[1]) for row in df[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
-    # store_zipcode = Counter(('WG'+row[1].split('_')[1], row[0].split('_')[0]) for row in df[['zipcode', 'store_id']].values)  
+    # zipcode_store = Counter((row[0].split('_')[0], 's'+row[1].split('_')[1]) for row in df[['zipcode', 'store_id']].values)  # 26615 unique store-zipcode pairs, so stores are showing up in multiple zipcode queries (as stated in the problem statement)
+    # store_zipcode = Counter(('s'+row[1].split('_')[1], row[0].split('_')[0]) for row in df[['zipcode', 'store_id']].values)  
 
     # # list all the zipcodes for each store, and all stores for each zipcode
     # store_zipcodes, zipcode_stores = {}, {}
@@ -133,7 +168,7 @@ def main(limit=100):
     #     store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
     #     zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store] 
 
-    G = draw_graph(build_graph(df=df, limit=limit), labels=False, layout='spring')
+    G = draw_graph(build_graph(df=api.db, limit=limit), labels=False, layout='spring')
     
     # draw_graph(sorted(zipcode_store.keys())[:50], labels=False, layout='shell')
     # plt.title('Shell: 50 Zipcode->Store Edges')

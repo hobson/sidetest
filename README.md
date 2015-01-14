@@ -1,4 +1,4 @@
-# sidetest
+# Sidetest
 
 I'm having fun, here with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
 
@@ -49,35 +49,31 @@ With all the dependencies installed you should be ready to run it as a script to
 
     python attempt.py
 
-Check out the doctsring in attempts.py if you want to run it within an ipython console (REPL). This example just outputs the first 100 query responses:
 
-    >>> import attempt
-    >>> for i, rec in enumerate(attempt.generate_walgreens()):
-    ...     print(rec)
-    ...     if i > 100:
-    ...         break
-    (18716, 1, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_4926', u'2013-12-18 23:52:03', u'19135_1')
-    (18717, 0, u'e00d60d327046ad96439559e177a4ade361c8688', 0, u'walgreens_5522', u'2013-12-18 23:52:03', u'19135_1')
-    ...
-
-# I want to learn python "best practices"
+# Use python "best practices"
 
 Virtualenvs help you maintain repeatable development environments. Virtualenvwrapper makes it even easier. Follow the instructions for installing virtualenvwrapper [here](http://virtualenvwrapper.readthedocs.org/en/latest/install.html). Or if you want a bit more customized instructions for Mac OSX, this might help: http://jamie.curle.io/blog/installing-pip-virtualenv-and-virtualenvwrapper-on-os-x/
 
-# I don't want to use a virtualenv
+# I don't want to use `virtualenv`
 
     git clone https://github.com/hobson/sidetest.git
     cd sidetest
     sudo pip install -r requirements.txt
     python attempt.py
 
-# I don't want to use pip
+# I don't want to use `pip`
+
+`Sidetest` depends on 3 python packages:
+
+    1. `pandas` (efficient querying or large datasets in RAM)
+    2. `networkx` (efficient graph algorithms and data structures)
+    3. `future` (python 2/3 compatability for `http.server` module to serve pretty d3.js plots)
 
 Follow the official instructions for installing pandas [here](http://pandas.pydata.org/pandas-docs/stable/install.html)
 
-Find the isntructions for installing `networkx` on your system and install it as well.
+You can find `networkx` [here](https://networkx.github.io/download.html).
 
-The other dependencies listed in `requirements.txt` should have been installed with `pandas` and `networkx`.
+The other dependencies listed in `sidetest/requirements.txt` should have been installed already when you isntalled `pandas` and `networkx`.
 
 You can then clone the repo and run the attempts.py script:
 

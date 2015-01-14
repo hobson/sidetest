@@ -144,7 +144,7 @@ def bfs_tree_layout(G, root, rowheight = 0.02, nodeskip = 0.6):
     return pos
 
 def snapshot_heap(heap):
-    draw_heap(heap, pdffile)
+    draw_heap(heap, 'heap_snapshot.pdf')
 
 def draw_heap(heap, outfile=None):
     """Draw the heap using matplotlib and networkx"""
@@ -299,13 +299,17 @@ def random_mst_graph(n, k=4):
 
     # add edges
     for i in G.nodes():
+        # Compute the distances to all the other nodes
         near = [(u, dist(G.node[i]['pos'],G.node[u]['pos'])) 
                     for u in G.nodes() if u != i]
+        # sort the list of node distances according to the distance [1]:
         near.sort(cmp=lambda x,y: cmp(x[1],y[1]))
+        # add edges to the closest 4 nodes
         for u,d in near[0:k]:
             G.add_edge(i, u, length=d)
 
     # ensure it's connected
+    # first get a list of all the cliques (connected components)
     CC = list(nx.connected_components(G))
     for i in xrange(len(CC)-1):
         u = random.choice(CC[i])
