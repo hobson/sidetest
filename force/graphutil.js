@@ -9,6 +9,7 @@ function autoscale(data) {
     return d3.scale.pow().exponent(exp).domain([x_min, x_max]).range([0.0, 1.0]);
 }
 
+// THIS IS BROKEN
 function autoscale_and_length(data, width, height) {
     var N_edges = data.links.length;
     var x_min = d3.min(data.links, function (d) { return +d.weight; });

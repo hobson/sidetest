@@ -15,7 +15,7 @@ import json
 import http.server
 
 
-def load_dataframe(path='gistfile1.json'):
+def load_dataframe(path='responses.json'):
     """Create a pandas dataframe from a list of objects in a json file"""
     js = json.load(open(path, 'r'))
     df = pd.DataFrame.from_records(js)
