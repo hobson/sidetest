@@ -1,6 +1,6 @@
 # <a name='Sidetest'/>Sidetest<a>
 
-I'm having fun, here with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
+I'm having fun with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
 
 # <a name='Problem'/>Problem<a>
 
