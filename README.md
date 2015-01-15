@@ -6,7 +6,7 @@ I'm having fun, here with a traveling salesman, minimum spanning tree problem, t
 
 Say you have an API that you can query with a zip code, and you get a list of the closest 5 stores, and you want to "visit" all the stores with as few queries as possible. 
 
-# Possible Algorithms
+# <a name='PossibleAlgorithms'/>Possible Algorithms</a>
 
 If you use Kruskal's Algorithm with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 vertices, but Kruskal only gives you credit for 1 as it explores the graph. You could give each zip/edge/arc a weight of N or N^2 (length of 1/N or 1/N^2, where N is the number of stores in that zip query (usually 5).  This improves things a big and is what I've done. But since this is pretty uniform length/weight it help all that much. What if you added 0-length edges between all stores returned for a given zip!? Now we're talking! But wait, you don't get ALL the possible nodes for a given zipcode query. You only get 5.  So maybe 1/N is the right cost metric (length). 
 
@@ -26,11 +26,11 @@ Here are the first 7 store -> zipcode edges:
 
 ![Force-Directed Graph, 7 Stores](first7stores.png?raw=true "First 7 Stores, Force-Directed Layout")
 
-# My Attempt
+# <a name='MyAttempt'/>My Attempt</a>
 
 I'm using 1/min(N,5) s the length for each edge between stores sharing a zipcode query response. MST algorithms usually assume a fully connected graph -- you can see from the plots that this one isn't. So I'm doing MST (Kruskal) on each of the graph cliques. The second option is what I've chosen. Should have a solution up shortly.
 
-# Installation
+# <a name='Installation'/>Installation</a>
 
 If you use pip, virtualenv, and virtualenvwrapper (you really should):
 
@@ -43,14 +43,14 @@ Be patient with the installation of requirements, especially if you have never i
 
     pip install -r requirements.txt
 
-# Usage
+# <a name='Usage'/>Usage</a>
 
 With all the dependencies installed you should be ready to run it as a script to see example output.  
 
     python attempt.py
 
 
-# Use python "best practices"
+# <a name='UsePythonBestPractices'/>Use python "best practices"</a>
 
 Virtualenvs help you maintain repeatable development environments. Virtualenvwrapper makes it even easier. Follow the instructions for installing virtualenvwrapper [here](http://virtualenvwrapper.readthedocs.org/en/latest/install.html). Or if you want a bit more customized instructions for Mac OSX, this might help: http://jamie.curle.io/blog/installing-pip-virtualenv-and-virtualenvwrapper-on-os-x/
 
