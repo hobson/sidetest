@@ -1,8 +1,8 @@
-# <a name="Sidetest"/>Sidetest<a>
+# <a name="Sidetest"/>Sidetest
 
 I'm having fun with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
 
-# <a name='Problem'/>Problem<a>
+# <a name="Problem"/>Problem
 
 Say you have an API that you can query with a zip code, and you get a list of the closest N stores, and you want to "visit" all the stores with as few queries as possible. 
 
@@ -36,7 +36,7 @@ Here's the first MST attempt:
 
 But I haven't tested it to see if it's optimal or even a complete list. With 3381 queries required for 7921 stores and 5 stores returned per zip (most of the time), this definitely seems suboptimal.
 
-# <a name="Solution">Solution</a>
+# <a name="Solution">Solution
 
 I'm not sure this problem can be easily transformed to fit an MST solver. Instead, why not just use logic to whittle it down. Start with 2 `dict`s:
 
@@ -74,14 +74,14 @@ Be patient with the installation of requirements, especially if you have never i
 
     pip install -r requirements.txt
 
-# <a name='Usage'/>Usage</a>
+# <a name="Usage"/>Usage
 
 With all the dependencies installed you should be ready to run it as a script to see example output.  
 
     python attempt.py
 
 
-# <a name='UsePythonBestPractices'/>Use python "best practices"</a>
+# <a name="UsePythonBestPractices"/>Use python "best practices"
 
 Virtualenvs help you maintain repeatable development environments. Virtualenvwrapper makes it even easier. Follow the instructions for installing virtualenvwrapper [here](http://virtualenvwrapper.readthedocs.org/en/latest/install.html). Or if you want a bit more customized instructions for Mac OSX, this might help: http://jamie.curle.io/blog/installing-pip-virtualenv-and-virtualenvwrapper-on-os-x/
 
