@@ -12,7 +12,16 @@ from __future__ import division
 import math
 import random
 import networkx as nx
+global pdffile
 
+def start_pdf(outfile):
+    from matplotlib.backends.backend_pdf import PdfPages
+    pp = PdfPages(outfile)
+    return pp
+
+global pdffile
+pdffile = start_pdf("mst.pdf")
+    
 
 
 ARITY = 3  # the branching factor of the d-Heaps

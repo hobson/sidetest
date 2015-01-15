@@ -21,13 +21,20 @@ or this
 
 ![Shell Graph Diagram](shell50edges.png?raw=true "50 Store-Zipcode Edges, Shell (Circle) Layout")
 
-Here are the first 7 store -> zipcode edges:
-
-![Force-Directed Graph, 7 Stores](first7stores.png?raw=true "First 7 Stores, Force-Directed Layout")
-
 # <a name='MyAttempt'/>My Attempt</a>
 
 I'm using 1/min(N,5) s the length for each edge between stores sharing a zipcode query response. MST algorithms usually assume a fully connected graph -- you can see from the plots that this one isn't. So I'm doing MST (Kruskal) on each of the graph cliques. The second option is what I've chosen. Should have a solution up shortly.
+
+Here's the first MST attempt:
+
+    In [1]: from attempt import minimum_spanning_zipcodes
+    In [2]: zipcodes = minimum_spanning_zipcodes()
+    In [3]: len(zipcodes)
+    Out[3]: 7659
+    In [4]: len(list(set(zipcodes)))
+    Out[4]: 3381
+
+But I haven't tested it to see if it's optimal or even a complete list. With 3381 queries required for 7921 stores and 5 stores returned per zip (most of the time), this definitely seems suboptimal.
 
 # <a name='Installation'/>Installation</a>
 

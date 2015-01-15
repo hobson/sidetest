@@ -35,11 +35,16 @@ def analyze(df=None):
 
 
 def split_into_connected_graphs(G):
+    """CRUFT: Equivalent to list(nx.connected_component_subgraphs(G))"""
     CGs = []
     for cc in nx.connected_components(G):
         CG = nx.Graph()
-        for node in cc:
-            CG
+        for node_label in cc:
+            # this will add edges in both directions, so 2x inefficient
+            for target_label in G[node_label].keys():
+                CG.add_edge(node_label, target_label, **G.get_edge_data(node_label, target_label))
+        CGs += [CG]
+    return CGs
 
 
 def api(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode='76065', page=1):
@@ -63,7 +68,16 @@ def api(product='e00d60d327046ad96439559e177a4ade361c8688', zipcode='76065', pag
 api.db = load_dataframe()
 
 
-def build_graph(df, limit=100):
+def minimum_spanning_zipcodes():
+    zipcode_query_sequence = []
+    G = build_graph(api.db, limit=1000000)
+    for CG in nx.connected_component_subgraphs(G):
+        for edge in nx.minimum_spanning_edges(CG):
+            zipcode_query_sequence += [edge[2]['zipcode']]
+    return zipcode_query_sequence
+
+
+def build_graph(df, limit=1000000, max_stores_per_query=5):
     """Construct a networkx graph from a DataFrame of API responses containing `zipcode` and `store_id` columns.""" 
 
     # hash-tables of all the zipcodes that could be queried to produce a store, and all stores that are returned in the response for each zipcode
@@ -80,8 +94,9 @@ def build_graph(df, limit=100):
 
     # Lengths are proportional to the number of stores that are returned for the same zipcode query, maximum of 5 for the pagination limit
     for zc, stores in zipcode_stores.iteritems():
-        L = 1.0 / min(len(stores), 5.0)
-        for edge in itertools.combinations(stores, 2):
+        L = 1.0 / min(len(stores), float(max_stores_per_query))
+        # connect all zipcodes returned by a single query with a zero-length edge
+        for edge in itertools.combinations(stores[:max_stores_per_query], 2):
             if edge[0] == edge[1]:
                 continue
             length, zipcode = L, zc
