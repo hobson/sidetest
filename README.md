@@ -21,7 +21,7 @@ or this
 
 ![Shell Graph Diagram](shell50edges.png?raw=true "50 Store-Zipcode Edges, Shell (Circle) Layout")
 
-# <a name='MyAttempt'/>My Attempt</a>
+# <a name='First Solution Attempt'/>First Solution Attempt</a>
 
 I'm using 1/min(N,5) s the length for each edge between stores sharing a zipcode query response. MST algorithms usually assume a fully connected graph -- you can see from the plots that this one isn't. So I'm doing MST (Kruskal) on each of the graph cliques. The second option is what I've chosen. Should have a solution up shortly.
 
@@ -36,7 +36,32 @@ Here's the first MST attempt:
 
 But I haven't tested it to see if it's optimal or even a complete list. With 3381 queries required for 7921 stores and 5 stores returned per zip (most of the time), this definitely seems suboptimal.
 
-# <a name='Installation'/>Installation</a>
+# <a name="Solution">Solution<a>
+
+I'm not sure this problem can be easily transformed to fit an MST solver. Instead, why not just use logic to whittle it down. Start with 2 `dict`s:
+
+    1. zip code -> stores
+    1-a. store `list` -- a sequence preserves the order of pages in the query resonse
+    1-b. store `set`  -- more efficiently find if it has a particular store id
+    2. store   -> zip codes
+    2-a. zip code `list` -- preserves the order they were originally queried
+    2-b. zip code `set` -- more efficiently find if a store can be retrieved using a particular zip code
+
+Then sort the `store_zipcodes` dict by the len of their zipcode sequences (increasing order), so that you start with stores that can only be found with one zip code query. Union all these 1-length sets of zipcodes and make sure neither the stores nor the zip codes appear anywhere else in your dictionaries (they shouldn't if the queries are invertable).
+
+This first step only eliminates 476 stores, 5% of the 7921 stores. So this isn't saving much, even if it is an O(N) problem).
+
+    In [1]: from attempt import zipcodes_to_query()
+    In [2]: len(zipcodes_to_query())
+    Out[2]: 476
+
+Next, for the remaining stores (this should actually work from the very beginning:
+
+    for each store:
+       sort zipcodes in reverse order of the number of stores associated with them len(zipcode_stores[store])
+       pick the first zipcode in the longest list that has the store in the first 5 elements of the sequence
+       if still not found just pick the first zipcode (with the longest list of stores)
+       eliminate this zipcode and the batch of 5 stores associated with it from the list under consideration (replacing store id's with Nones so that the sequences order and batches of 5 are preserved but set membership is not) adding all these zipcode->store pairs to your "found" list (which will be used later to execute the queries)
 
 If you use pip, virtualenv, and virtualenvwrapper (you really should):
 

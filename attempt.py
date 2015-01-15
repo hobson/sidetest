@@ -77,6 +77,54 @@ def minimum_spanning_zipcodes():
     return zipcode_query_sequence
 
 
+def zipcodes_to_query():
+    """Second attempt at a simpler non-grpahy solution
+
+    for each store:
+       sort zipcodes in reverse order of the number of stores associated with them len(zipcode_stores[store])
+       pick the first zipcode in the longest list that has the store in the first 5 elements of the sequence
+       if still not found just pick the first zipcode (with the longest list of stores)
+       eliminate this zipcode and the batch of 5 stores associated with it from the list under consideration 
+          (replacing store id's with Nones so that the sequences order and batches of 5 are preserved but set membership is not) adding all these zipcode->store pairs to your "found" list (which will be used later to execute the queries)
+
+    """
+    queries = []
+    query_set = []
+    stores_found = set()
+
+    # hash-tables of all the zipcodes that could be queried to produce a store, and all stores that are returned in the response for each zipcode
+    store_zipcodes, zipcode_stores = {}, {}
+    for zipcode, store in api.db[['zipcode', 'store_id']].values:
+        zipcode = int(zipcode.split('_')[0])
+        store = int(store.split('_')[1])
+        store_zipcodes[store] = store_zipcodes.get(store, []) + [zipcode]
+        zipcode_stores[zipcode] = zipcode_stores.get(zipcode, []) + [store]
+    zipcode_store_set = {}
+    for zipcode in zipcode_stores:
+        zipcode_store_set[zipcode] = set(zipcode_stores[zipcode])
+    store_zipcode_set = {}
+    for store in store_zipcodes:
+        store_zipcode_set[store] = set(store_zipcodes[store])
+
+    zipcode_stores = OrderedDict(sorted(zipcode_stores.items(), key=lambda pair: -len(pair[1])))
+    store_zipcodes = OrderedDict(sorted(store_zipcodes.items(), key=lambda pair: +len(pair[1])))
+
+    for store, zipcodes in store_zipcodes.iteritems():
+        if len(zipcodes) > 1:
+            break
+        zc = zipcodes[0]
+        queries += [zc]
+        stores_found.add(store)
+        del store_zipcode_set[store]
+        # store_zipcodes unchanged
+
+    for store, zipcode_set in store_zipcode_set.iteritems():
+        # TODO
+        pass
+
+    return queries
+
+
 def build_graph(df, limit=1000000, max_stores_per_query=5):
     """Construct a networkx graph from a DataFrame of API responses containing `zipcode` and `store_id` columns.""" 
 
