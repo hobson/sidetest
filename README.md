@@ -1,4 +1,4 @@
-# <a name='Sidetest'/>Sidetest<a>
+# <a name="Sidetest"/>Sidetest<a>
 
 I'm having fun with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
 
@@ -6,7 +6,7 @@ I'm having fun with a traveling salesman, minimum spanning tree problem, though 
 
 Say you have an API that you can query with a zip code, and you get a list of the closest N stores, and you want to "visit" all the stores with as few queries as possible. 
 
-# <a name="PossibleAlgorithms"/>Possible Algorithms</a>
+# <a name="PossibleAlgorithms"/>Possible Algorithms
 
 If you use Kruskal's Algorithm with stores as veriticies and zipcodes as edges, it won't be optimal, because one zip would get you 5 vertices, but Kruskal only gives you credit for 1 as it explores the graph. You could give each zip/edge/arc a weight of N or N^2 (length of 1/N or 1/N^2, where N is the number of stores in that zip query, up to some pagination limit (say 5).  This improves things a bit, and is what I've done. But since this is pretty uniform length/weight, since most queries will be limitted only by the pagination limit, it help all that much. What if you added 0-length edges between all stores returned for a given zip!? Now we're talking! But wait, you don't get ALL the possible nodes for a given zipcode query. You only get 5.  So maybe 1/N is the right cost metric (weight/length) after all. 
 
@@ -21,7 +21,7 @@ or this
 
 ![Shell Graph Diagram](shell50edges.png?raw=true "50 Store-Zipcode Edges, Shell (Circle) Layout")
 
-# <a name="FirstSolutionAttempt"/>First Solution Attempt</a>
+# <a name="FirstSolutionAttempt"/>First Solution Attempt
 
 I'm using 1/min(N,5) s the length for each edge between stores sharing a zipcode query response. MST algorithms usually assume a fully connected graph -- you can see from the plots that this one isn't. So I'm doing MST (Kruskal) on each of the graph cliques. The second option is what I've chosen. Should have a solution up shortly.
 
