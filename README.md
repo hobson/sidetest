@@ -1,8 +1,8 @@
-# Sidetest
+# <a name='Sidetest'/>Sidetest<a>
 
 I'm having fun, here with a traveling salesman, minimum spanning tree problem, though I'm not sure MST is the right way to pose the problem.  
 
-# Problem
+# <a name='Problem'/>Problem<a>
 
 Say you have an API that you can query with a zip code, and you get a list of the closest 5 stores, and you want to "visit" all the stores with as few queries as possible. 
 
