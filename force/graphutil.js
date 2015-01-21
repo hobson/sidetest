@@ -1,5 +1,23 @@
+// requires:
+// <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+// <script type="text/javascript" src="cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+
+
 function autoscale(data) {
-    var N_edges = data.links.length;
+    var i = 0;
+    var N_edges = data.length;
+    var weight_name = "value";
+    if (data[0].hasOwnProperty("value")) {
+        weight_name = "value"; }
+    else {
+        if (data[0].hasOwnProperty("weight")) {
+            for (i=0; i<data.length; ++i) {
+                data[i]["value"] = data[i]["weight"]; } }
+        else {
+            if (data[0].hasOwnProperty("length")) {
+                for (i=0; i<data.length; ++i) {
+                    data[i]["value"] = 1.0 / (Math.max(+data[i]["length"], 0.000001)); } } } }
+     
     // TODO: use d3.extent() for better efficiency?
     var x_min = d3.min(data, function (d) { return +d.weight; });
     var x_max = d3.max(data, function (d) { return +d.weight; });
