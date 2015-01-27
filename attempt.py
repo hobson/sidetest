@@ -80,6 +80,7 @@ def minimum_spanning_zipcodes():
 def zipcodes_to_query():
     """Second attempt at a simpler non-grpahy solution
 
+
     for each store:
        sort zipcodes in reverse order of the number of stores associated with them len(zipcode_stores[store])
        pick the first zipcode in the longest list that has the store in the first 5 elements of the sequence
