@@ -78,7 +78,7 @@ def minimum_spanning_zipcodes():
 
 
 def zipcodes_to_query():
-    """Second attempt at a simpler non-grpahy solution
+    """Second attempt at a simpler non-graphy solution
 
     for each store:
        sort zipcodes in reverse order of the number of stores associated with them len(zipcode_stores[store])
@@ -88,7 +88,8 @@ def zipcodes_to_query():
           (replacing store id's with Nones so that the sequences order and batches of 5 are preserved but set membership is not) adding all these zipcode->store pairs to your "found" list (which will be used later to execute the queries)
 
     """
-    queries = []
+    # the order of the queried zipcodes doesn't matter
+    queries = set()
     query_set = []
     stores_found = set()
 
@@ -113,7 +114,7 @@ def zipcodes_to_query():
         if len(zipcodes) > 1:
             break
         zc = zipcodes[0]
-        queries += [zc]
+        queries.add(zc)
         stores_found.add(store)
         del store_zipcode_set[store]
         # store_zipcodes unchanged
